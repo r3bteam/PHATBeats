@@ -21,7 +21,7 @@ client.on('error', console.error)
 //ready event
 client.on('ready', () => {
 	//set clients activity to show server count
-	client.user.setActivity(`Dank Beats`, {type: 'LISTENING'})
+	client.user.setActivity(`Dank Tunes`, {type: 'LISTENING'})
 
 	console.log(`Logged in as ${client.user.username}!`)
 	console.log(`Connected to ${client.guilds.size} servers`)

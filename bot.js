@@ -11,7 +11,6 @@ const ytdl = require('ytdl-core')
 
 const youtube = new YouTube(GOOGLE_API_KEY)
 
-
 const queue = new Map()
 
 //set warn and error events to console.warn and console.error
@@ -160,7 +159,7 @@ client.on('message', async message => {
 		case 'skip':
 			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (!serverQueue) return message.reply(`There is nothing playing for me to skip`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != serverQueue.voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			serverQueue.connection.dispatcher.end(`Skipped Song`)
 			message.delete(0).catch(error => console.error(error))
 			break
@@ -168,7 +167,7 @@ client.on('message', async message => {
 		case 'stop':
 			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != serverQueue.voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			serverQueue.songs = []
 			serverQueue.connection.dispatcher.end(`Stopped Song`)
 			message.delete(0).catch(error => console.error(error))
@@ -183,7 +182,7 @@ client.on('message', async message => {
 		case 'volume':
 			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (!serverQueue) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != serverQueue.voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (!args[0] || !args[0].match(/^[0-9]+$/g)) return message.reply(`The current volume is: \`${serverQueue.volume}%\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
 			if (parseInt(args[0]) > 200 || parseInt(args[0]) < 10) return message.reply(`Please use a volume value between \`10\` & \`200\``).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			serverQueue.volume = args[0]
@@ -200,6 +199,8 @@ client.on('message', async message => {
 			break
 
 		case 'pause':
+			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue && serverQueue.playing) {
 				serverQueue.playing = false
 				serverQueue.connection.dispatcher.pause()
@@ -210,6 +211,8 @@ client.on('message', async message => {
 			break
 
 		case 'resume':
+			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue && !serverQueue.playing) {
 				serverQueue.playing = true
 				serverQueue.connection.dispatcher.resume()

@@ -247,7 +247,7 @@ function play(guild, song) {
 
 	dispatcher.setVolumeLogarithmic(serverQueue.volume / 100)
 
-	serverQueue.textChannel.send(`${song.requested}, Your requested song \`${song.title}\` has started playing in channel \`${serverQueue.voiceChannel.name}\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
+	serverQueue.textChannel.send(`${song.requested}, Your requested song \`${song.title}\` has started playing in channel \`${guild.member(client.user).voiceChannel.name}\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
 }
 
 async function handleVideo(video, message, playlist = false) {

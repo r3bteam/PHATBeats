@@ -48,14 +48,24 @@ client.on('message', async message => {
 
 	switch(command) {
 		case 'play':
-			if (!args[0]) return message.reply(`Please provide a youtube video link`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (!args[0]) {
+				message.author.send(`Incorrect command usage... please provide a youtube search term, youtube video link or youtube playlist link.\n\`EXAMPLE: ${PREFIX}play (url/title)\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
 
-			const voiceChannel = message.member.voiceChannel
-			if (!voiceChannel) return message.reply(`You need to be inside a channel to listen to music`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (!message.member.voiceChannel) {
+				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
 
-			const permissions = voiceChannel.permissionsFor(client.user)
-			if (!permissions.has(`CONNECT`)) return message.reply(`I do not have permission to connect your voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (!permissions.has(`SPEAK`)) return message.reply(`I do not have permission to speak in your voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			const permissions = message.member.voiceChannel.permissionsFor(client.user)
+			if (!permissions.has(`CONNECT`) || !permissions.has(`SPEAK`)) {
+				message.author.send(`I do not have the correct permissions to join your voice channel`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
 
 			if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {
 				message.channel.send(`Adding songs to queue...`).then(async msg => {
@@ -153,87 +163,247 @@ client.on('message', async message => {
 					}
 				}
 			}
-			message.delete(0).catch(error => console.error(error))
 			break
 
 		case 'skip':
-			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (!serverQueue) return message.reply(`There is nothing playing for me to skip`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			serverQueue.connection.dispatcher.end(`Skipped Song`)
-			message.delete(0).catch(error => console.error(error))
+			if (!message.member.voiceChannel) {
+				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) {
+				message.author.send(`You must be inside the voice channel playing music to use this command...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (serverQueue.songs[0].requestedBy.id === message.author.id) {
+				serverQueue.connection.dispatcher.end()
+				break
+			}
+
+			let skipString = `\`${message.author.username}\` has requested to skip the current song...\n\none clap, two clap, forty? Click on the 👏 to vote`			
+			message.channel.send(skipString)
+				.then(async msg => {
+
+					await msg.react('👏')
+
+					const filter = (reaction, user) => user.id === message.author.id && reaction.emoji.name === '👏'
+					var collector = msg.createReactionCollector(filter, { time: 30 * 1000 })
+
+					collector.on('collect', async r => {
+						await r.users.array().forEach((user, index) => {
+							let bot = message.guild.member(client.user)
+	
+							if (!bot.voiceChannel.members.find('name', user.username)) {
+								r.remove(user).catch(error => console.log(error))
+							}
+						})
+
+						if (r.count > parseInt(message.member.voiceChannel.members.size / 2) - 1) {
+							console.log(`skip vote successful`)
+							serverQueue.connection.dispatcher.end()
+							collector.stop()
+						}
+					})
+
+					collector.on('end', collected => {
+						msg.delete(0)
+					})
+				})
 			break
 
-		case 'stop':
+		case 'clear':
 			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			serverQueue.songs = []
-			serverQueue.connection.dispatcher.end(`Stopped Song`)
+			if (serverQueue.songs.length === 0) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			
+			let requestedSongs = serverQueue.songs.filter(song => song.requestedBy.id === message.author.id)
+			let isCurrentSong = false
+			
+			if (requestedSongs.length === 0) return message.reply(`You have no requested songs in this queue`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			requestedSongs.forEach((song, index) => {
+				let queueIndex = serverQueue.songs.indexOf(song)
+				
+				if (queueIndex === 0 && !isCurrentSong) {
+					isCurrentSong = true
+					console.log(`current song detected`)
+				} else {
+					serverQueue.songs.splice(queueIndex, 1)
+				}
+				console.log(`Removed ${song.title} from queue`)
+			})
+
+			if (isCurrentSong) {
+				serverQueue.connection.dispatcher.end()
+			}
+
+			console.log(serverQueue.songs)
 			message.delete(0).catch(error => console.error(error))
 			break
 
 		case 'song':
-			if (!serverQueue) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			message.channel.send(`Now Playing: \`${serverQueue.songs[0].title}\` in channel \`${serverQueue.voiceChannel.name}\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
-			message.delete(0).catch(error => console.error(error))
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			let durationString = serverQueue.songs[0].duration.hours > 0 ? `${serverQueue.songs[0].duration.hours} HOURS, ${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.` : `${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.`
+			let songString = `__**CURRENT SONG INFORMATION:**__\n\nTitle: \`${serverQueue.songs[0].title}\`\n\nDescription:\n\`\`\`${serverQueue.songs[0].description.substr(0, 1000).replace('`', '')}\`\`\`\nDuration: \`${durationString}\``
+			message.channel.send(`${songString.substr(0, 2000)}`).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
 			break
 
 		case 'volume':
-			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (!serverQueue) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (!args[0] || !args[0].match(/^[0-9]+$/g)) return message.reply(`The current volume is: \`${serverQueue.volume}%\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
-			if (parseInt(args[0]) > 200 || parseInt(args[0]) < 10) return message.reply(`Please use a volume value between \`10\` & \`200\``).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (!message.member.voiceChannel) {
+				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) {
+				message.author.send(`You must be inside the voice channel playing music to use this command...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (!args[0] || !args[0].match(/^[0-9]+$/g)) {
+				message.channel.send(`The current volume is: \`${serverQueue.volume}%\``)
+					.then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (parseInt(args[0]) > 200 || parseInt(args[0]) < 10) {
+				message.author.send(`Please use a volume value between \`10\` & \`200\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
 			serverQueue.volume = args[0]
 			serverQueue.connection.dispatcher.setVolumeLogarithmic(parseInt(args[0]) / 100)
-			message.reply(`I have set the volume to \`${serverQueue.volume}%\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
-			message.delete(0).catch(error => console.error(error))
+
+			serverQueue.songs[0].requestedIn.send(`\`${message.author.username}\` has set the volume to \`${serverQueue.volume}%\``)
+				.then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
 			break
 
 		case 'queue':
-			if (!serverQueue) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			let queueString = `__**SONG QUEUE:**__\n\n${serverQueue.songs.slice(0, 20).map(song => `**•** ${song.title}`).join('\n')}\n${serverQueue.songs.length > 20 ? `**•** +${serverQueue.songs.length - 20} remaining\n` : ``}\n**Now Playing:** ${serverQueue.songs[0].title}`
-			message.channel.send(`${queueString.substr(0, 2000)}`).then(msg => msg.delete(30 * 1000)).catch(error => console.error(error))
-			message.delete(0).catch(error => console.error(error))
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			let queueString = `__**SONG QUEUE:**__\n\n${serverQueue.songs.slice(0, 20).map(song => `**•** \`${song.title}\` | **Requested By** \`${song.requestedBy.username}\``).join('\n')}\n${serverQueue.songs.length > 20 ? `**•** +${serverQueue.songs.length - 20} remaining\n` : ``}\n**Now Playing:** ${serverQueue.songs[0].title}`
+			message.channel.send(`${queueString.substr(0, 2000)}`)
+				.then(msg => msg.delete(30 * 1000)).catch(error => console.error(error))
 			break
 
 		case 'pause':
-			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (!message.member.voiceChannel) {
+				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) {
+				message.author.send(`You must be inside the voice channel playing music to use this command...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
 			if (serverQueue && serverQueue.playing) {
 				serverQueue.playing = false
 				serverQueue.connection.dispatcher.pause()
-				return message.reply(`I have paused the music for you`).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
+
+				serverQueue.songs[0].requestedIn.send(`\`${message.author.username}\` has paused the current song \`${serverQueue.songs[0].title}\``)
+					.then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
+
+				client.setTimeout(() => {
+					if(serverQueue && !serverQueue.playing) {
+						serverQueue.playing = true
+						serverQueue.connection.dispatcher.resume()
+					}
+				}, 120 * 1000)
+				break
 			}
-			message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			message.delete(0).catch(error => console.error(error))
+
+			message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+				.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			break
 
 		case 'resume':
-			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) return message.reply(`You must be inside the voice channel playing music to use this command`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (!message.member.voiceChannel) {
+				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) {
+				message.author.send(`You must be inside the voice channel playing music to use this command...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
 			if (serverQueue && !serverQueue.playing) {
 				serverQueue.playing = true
 				serverQueue.connection.dispatcher.resume()
-				return message.reply(`I have resumed the music for you`).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
-				message.delete(0).catch(error => console.error(error))
+				break
 			}
-			message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
-			message.delete(0).catch(error => console.error(error))
+
+			message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+				.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			break
 	}
+	message.delete(0).catch(error => console.error(error))
 })
 
 client.login(TOKEN)
 
-function play(guild, song) {
+async function play(guild, song) {
 	const serverQueue = queue.get(guild.id)
 
 	if (!song) {
-		serverQueue.voiceChannel.leave()
+		guild.member(client.user).voiceChannel.leave()
 		queue.delete(guild.id)
 		return
+	}
+
+	if (guild.member(song.requestedBy) && guild.member(song.requestedBy).voiceChannel) {
+		if (guild.member(client.user).voiceChannel.id != guild.member(song.requestedBy).voiceChannel.id) {
+			await guild.member(song.requestedBy).voiceChannel.join()
+				.then(connection => {
+					serverQueue.connection = connection
+					serverQueue.volume = 50
+				}).catch(error => console.error(error))
+		}
+	} else {
+		serverQueue.songs.shift()
+		play(guild, serverQueue.songs[0])
 	}
 
 	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, { filter: 'audioonly' }))
@@ -247,24 +417,24 @@ function play(guild, song) {
 
 	dispatcher.setVolumeLogarithmic(serverQueue.volume / 100)
 
-	serverQueue.textChannel.send(`${song.requested}, Your requested song \`${song.title}\` has started playing in channel \`${guild.member(client.user).voiceChannel.name}\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
+	song.requestedIn.send(`${song.requestedBy}, Your requested song \`${song.title}\` has started playing in channel \`${guild.member(song.requestedBy).voiceChannel.name}\``).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
 }
 
 async function handleVideo(video, message, playlist = false) {
-	const voiceChannel = message.member.voiceChannel
 	const serverQueue = queue.get(message.guild.id)
 
 	const song = {
 		id: Util.escapeMarkdown(video.id),
 		title: video.title,
+		description: video.description,
+		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
-		requested: message.author
+		requestedBy: message.author,
+		requestedIn: message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.find('name', 'bot-commands') : message.channel
 	}
 
 	if (!serverQueue) {
 		const queueConstruct = {
-			textChannel: message.channel,
-			voiceChannel: voiceChannel,
 			connection: null,
 			songs: [],
 			volume: 50,
@@ -276,7 +446,7 @@ async function handleVideo(video, message, playlist = false) {
 		queueConstruct.songs.push(song)
 
 		try {
-			await voiceChannel.join().then(connection => {
+			await message.guild.member(song.requestedBy).voiceChannel.join().then(connection => {
 				queueConstruct.connection = connection
 			})
 			play(message.guild, queueConstruct.songs[0])

@@ -306,7 +306,7 @@ client.on('message', async message => {
 				break
 			}
 
-			let queueString = `__**SONG QUEUE:**__\n\n${serverQueue.songs.slice(0, 20).map(song => `**•** \`${song.title}\` | **Requested By** \`${song.requestedBy.username}\``).join('\n')}\n${serverQueue.songs.length > 20 ? `**•** +${serverQueue.songs.length - 20} remaining\n` : ``}\n**Now Playing:** ${serverQueue.songs[0].title}`
+			let queueString = `__**SONG QUEUE:**__\n\n${serverQueue.songs.slice(0, 10).map(song => `**•** \`${song.title}\` | **Requested By** \`${song.requestedBy.username}\``).join('\n')}\n${serverQueue.songs.length > 10 ? `**•** +${serverQueue.songs.length - 10} remaining\n` : ``}\n**Now Playing:** ${serverQueue.songs[0].title}`
 			message.channel.send(`${queueString.substr(0, 2000)}`)
 				.then(msg => msg.delete(30 * 1000)).catch(error => console.error(error))
 			break

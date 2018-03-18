@@ -195,7 +195,7 @@ client.on('message', async message => {
 
 					await msg.react('👏')
 
-					const filter = (reaction, user) => user.id === message.author.id && reaction.emoji.name === '👏'
+					const filter = (reaction, user) => !user.bot && reaction.emoji.name === '👏'
 					var collector = msg.createReactionCollector(filter, { time: 30 * 1000 })
 
 					collector.on('collect', async r => {

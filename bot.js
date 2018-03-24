@@ -192,7 +192,7 @@ client.on('message', async message => {
 				break
 			}
 
-			let skipString = `\`${message.author.username}\` has requested to skip the current song...\n\none clap, two clap, forty? Click on the 👏 to vote`			
+			let skipString = `\`${message.author.username}\` has requested to skip the current song...\n\n**one clap, two clap, three clap, forty?**\n*Click on the 👏 to vote*`			
 			message.channel.send(skipString)
 				.then(async msg => {
 
@@ -425,6 +425,7 @@ async function play(guild, song) {
 
 async function handleVideo(video, message, playlist = false) {
 	const serverQueue = queue.get(message.guild.id)
+	const botCommandsChannel = message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commands').pop() : message.channel
 	
 	const song = {
 		id: Util.escapeMarkdown(video.id),
@@ -433,7 +434,7 @@ async function handleVideo(video, message, playlist = false) {
 		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
 		requestedBy: message.author,
-		requestedIn: message.channel.name === 'bot-commands' ? message.channel : message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commmands').pop() : message.channel
+		requestedIn: message.channel.name === 'bot-commands' ? message.channel : botCommandsChannel
 	}
 
 	if (!serverQueue) {

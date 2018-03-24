@@ -423,6 +423,12 @@ async function play(guild, song) {
 
 async function handleVideo(video, message, playlist = false) {
 	const serverQueue = queue.get(message.guild.id)
+	
+	try {
+		let sendToChannel = message.channel.name === 'bot-commands' ? message.channel : message.guild.channels.findAll('name', 'bot-commands').pop()
+	} catch (error) {
+		let sendToChannel = message.channel
+	}
 
 	const song = {
 		id: Util.escapeMarkdown(video.id),
@@ -431,7 +437,7 @@ async function handleVideo(video, message, playlist = false) {
 		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
 		requestedBy: message.author,
-		requestedIn: message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commands').pop() : message.channel
+		requestedIn: sendToChannel
 	}
 
 	if (!serverQueue) {

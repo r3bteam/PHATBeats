@@ -430,7 +430,7 @@ async function handleVideo(video, message, playlist = false) {
 		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
 		requestedBy: message.author,
-		requestedIn: message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commands').last(1) : message.channel
+		requestedIn: message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commands').pop() : message.channel
 	}
 
 	if (!serverQueue) {

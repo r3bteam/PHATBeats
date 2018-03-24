@@ -1,7 +1,7 @@
 const { Client, Util } = require('discord.js')
 
 const TOKEN = process.env.TOKEN
-const PREFIX = '.'
+const PREFIX = '/'
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
 
 const client = new Client({ disableEveryone: true })

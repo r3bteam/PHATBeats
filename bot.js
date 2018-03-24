@@ -425,7 +425,6 @@ async function play(guild, song) {
 
 async function handleVideo(video, message, playlist = false) {
 	const serverQueue = queue.get(message.guild.id)
-	let sendToChannel = message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commmands') : message.channel
 	
 	const song = {
 		id: Util.escapeMarkdown(video.id),

@@ -31,6 +31,7 @@ client.on('disconnect', () => {
 })
 
 client.on('reconnecting', () => {
+	client.user.setActivity(`Updates load...`, {type: 'WATCHING'})
 	console.log(`Reconnecting...`)
 })
 

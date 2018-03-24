@@ -424,8 +424,6 @@ async function play(guild, song) {
 async function handleVideo(video, message, playlist = false) {
 	const serverQueue = queue.get(message.guild.id)
 	
-	let botCommandsChannel = message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commmands').pop() : message.channel
-	
 	const song = {
 		id: Util.escapeMarkdown(video.id),
 		title: video.title,
@@ -433,7 +431,7 @@ async function handleVideo(video, message, playlist = false) {
 		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
 		requestedBy: message.author,
-		requestedIn: message.channel.name === 'bot-commands' ? message.channel : botCommandsChannel
+		requestedIn: message.channel.name === 'bot-commands' ? message.channel : (message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commmands').pop() : message.channel)
 	}
 
 	if (!serverQueue) {

@@ -151,8 +151,10 @@ client.on('message', async message => {
 									msg.delete(0)
 
 									try {
-										let video = await youtube.getVideoByID(videoID).catch(error => console.error(error))
-										await handleVideo(video, message)
+										if (videoID) {
+											let video = await youtube.getVideoByID(videoID).catch(error => console.error(error))
+											await handleVideo(video, message)	
+										}
 									} catch (error) {
 										console.error(error)
 									}
@@ -423,6 +425,7 @@ async function play(guild, song) {
 
 async function handleVideo(video, message, playlist = false) {
 	const serverQueue = queue.get(message.guild.id)
+	let sendToChannel = message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commmands') : message.channel
 	
 	const song = {
 		id: Util.escapeMarkdown(video.id),
@@ -431,7 +434,7 @@ async function handleVideo(video, message, playlist = false) {
 		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
 		requestedBy: message.author,
-		requestedIn: message.channel.name === 'bot-commands' ? message.channel : (message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commmands').pop() : message.channel)
+		requestedIn: message.channel.name === 'bot-commands' ? message.channel : sendToChannel
 	}
 
 	if (!serverQueue) {

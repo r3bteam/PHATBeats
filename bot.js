@@ -113,6 +113,7 @@ client.on('message', async message => {
 								await msg.react('\u0033\u20E3')
 								await msg.react('\u0034\u20E3')
 								await msg.react('\u0035\u20E3')
+								await msg.react('⛔')
 
 								const filter = (reaction, user) => user.id === message.author.id
 								var collector = msg.createReactionCollector(filter, { time: 30 * 1000 })
@@ -122,36 +123,44 @@ client.on('message', async message => {
 									if(r.emoji.name.includes('1')) {
 										//Use song selection one
 										videoID = videos[0].id
+										collector.stop()
 									}
 
 									if(r.emoji.name.includes('2')) {
 										//Use song selection two
 										videoID = videos[1].id
+										collector.stop()
 									}
 
 									if(r.emoji.name.includes('3')) {
 										//Use song selection three
 										videoID = videos[2].id
+										collector.stop()
 									}
 
 									if(r.emoji.name.includes('4')) {
 										//Use song selection four
 										videoID = videos[3].id
+										collector.stop()
 									}
 
 									if(r.emoji.name.includes('5')) {
 										//Use song selection five
 										videoID = videos[4].id
+										collector.stop()
 									}
 
-									collector.stop()
+									//End Collector Process
+									if(r.emoji.name === '⛔') {
+										collector.stop()
+									}
 								})
 
 								collector.on('end', async collected => {
 									msg.delete(0)
 
 									try {
-										if (videoID) {
+										if (videoID != null) {
 											let video = await youtube.getVideoByID(videoID).catch(error => console.error(error))
 											await handleVideo(video, message)	
 										}

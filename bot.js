@@ -1,7 +1,7 @@
 const { Client, Util } = require('discord.js')
 
 const TOKEN = process.env.TOKEN
-const PREFIX = '/'
+const PREFIX = '.'
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
 
 const client = new Client({ disableEveryone: true })
@@ -113,7 +113,7 @@ client.on('message', async message => {
 								await msg.react('\u0033\u20E3')
 								await msg.react('\u0034\u20E3')
 								await msg.react('\u0035\u20E3')
-								await msg.react('⛔')
+								await msg.react('❌')
 
 								const filter = (reaction, user) => user.id === message.author.id
 								var collector = msg.createReactionCollector(filter, { time: 30 * 1000 })
@@ -151,7 +151,7 @@ client.on('message', async message => {
 									}
 
 									//End Collector Process
-									if(r.emoji.name === '⛔') {
+									if(r.emoji.name === '❌') {
 										collector.stop()
 									}
 								})

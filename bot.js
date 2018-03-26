@@ -219,7 +219,7 @@ client.on('message', async message => {
 							}
 						})
 
-						if (r.count > parseInt((message.member.voiceChannel.members.size / 2) - 1)) {
+						if (r.count > parseInt((Math.ceil(message.member.voiceChannel.members.size) / 2) - 1)) {
 							console.log(`skip vote successful`)
 							serverQueue.connection.dispatcher.end()
 							collector.stop()

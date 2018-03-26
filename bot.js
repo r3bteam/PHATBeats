@@ -256,8 +256,7 @@ client.on('message', async message => {
 			if (isCurrentSong) {
 				serverQueue.connection.dispatcher.end()
 			}
-
-			console.log(serverQueue.songs)
+			
 			message.delete(0).catch(error => console.error(error))
 			break
 
@@ -348,13 +347,15 @@ client.on('message', async message => {
 
 				serverQueue.songs[0].requestedIn.send(`\`${message.author.username}\` has paused the current song \`${serverQueue.songs[0].title}\``)
 					.then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
-
+				
+				message.author.send(`You've paused \`${serverQueue.songs[0].title}\` in \`${message.guild.name}\`, you have \`3\` minutes to unpause the bot using \`${PREFIX}resume\` before the song is skipped...`)
+				
 				client.setTimeout(() => {
 					if(serverQueue && !serverQueue.playing) {
 						serverQueue.playing = true
-						serverQueue.connection.dispatcher.resume()
+						serverQueue.connection.dispatcher.end()
 					}
-				}, 120 * 1000)
+				}, 180 * 1000)
 				break
 			}
 

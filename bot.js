@@ -214,12 +214,12 @@ client.on('message', async message => {
 						await r.users.array().forEach((user, index) => {
 							let bot = message.guild.member(client.user)
 	
-							if (!bot.voiceChannel.members.find('name', user.username)) {
+							if (!bot.voiceChannel.members.find('user', user)) {
 								r.remove(user).catch(error => console.log(error))
 							}
 						})
 
-						if (r.count > parseInt(message.member.voiceChannel.members.size / 2) - 1) {
+						if (r.count > parseInt((message.member.voiceChannel.members.size / 2) - 1)) {
 							console.log(`skip vote successful`)
 							serverQueue.connection.dispatcher.end()
 							collector.stop()

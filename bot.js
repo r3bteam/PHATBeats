@@ -395,12 +395,12 @@ client.on('message', async message => {
 		case 'help':
 			let json = JSON.parse(fs.readFileSync('./help.json', 'utf8'))['results']
 			for (i in json) {
-				var command = ''
+				var cmd = ''
 				for (j in json[i]) {
 					var category = json[i]
-					command += `\n\`${prefix}${category[j].usage}\` | ${category[j].desc}\n`
+					cmd += `\n\`${prefix}${category[j].usage}\` | ${category[j].desc}\n`
 				}
-				message.author.send(`**${i}**\n${command}---------------\n`)
+				message.author.send(`**${i}**\n${cmd}---------------\n`)
 			}
 			message.author.send(`\`(required)\` | \`<optional>\``)
 			break

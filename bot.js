@@ -391,6 +391,19 @@ client.on('message', async message => {
 			message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
 				.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			break
+			
+		case 'help':
+			let json = JSON.parse(fs.readFileSync('./help.json', 'utf8'))['results']
+			for (i in json) {
+				var command = ''
+				for (j in json[i]) {
+					var category = json[i]
+					command += `\n\`${prefix}${category[j].usage}\` | ${category[j].desc}\n`
+				}
+				message.author.send(`**${i}**\n${command}---------------\n`)
+			}
+			message.author.send(`\`(required)\` | \`<optional>\``)
+			break
 	}
 	message.delete(0).catch(error => console.error(error))
 })

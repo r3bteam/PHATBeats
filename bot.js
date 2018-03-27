@@ -1,4 +1,5 @@
 const { Client, Util } = require('discord.js')
+const fs = require('fs')
 
 const TOKEN = process.env.TOKEN
 const PREFIX = '.'

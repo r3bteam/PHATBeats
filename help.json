@@ -1,0 +1,42 @@
+{
+	"results": {
+		"Music Commands": {
+			"play": {
+				"usage": "play (term / url / playlist-url)",
+				"desc": "Add a youtube video to the current song queue."
+			},
+			"skip": {
+				"usage": "skip",
+				"desc": "Vote to skip the current song *This will automatically skip if the user requested the song*"
+			},
+      "clear": {
+        "usage": "clear <@user>",
+        "desc": "Clear the desired users songs from the song queue *if @user is not defined it will remove your songs from the queue*"
+      },
+      "song": {
+        "usage": "song",
+        "desc": "Display information of the curernt song being played"
+      },
+      "queue": {
+        "usage": "queue",
+        "desc": "Display the next ten songs and their respective requesting user from the queue"
+      },
+      "volume": {
+        "usage": "volume <10 - 200>",
+        "desc": "Display/Change the current songs volume"
+      },
+      "pause": {
+        "usage": "pause",
+        "desc": "Pause the current song *The song will automatically skip after 3 minutes of being paused*"
+      },
+      "resume": {
+        "usage": "resume",
+        "desc": "Resume the current song"
+      },
+      "help": {
+        "usage": "help",
+        "desc": "Display the best, most useful help information you'll ever find anywhere on the internet"
+      }
+		}
+	}
+}

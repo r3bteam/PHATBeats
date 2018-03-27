@@ -399,7 +399,7 @@ client.on('message', async message => {
 				var cmd = ''
 				for (j in json[i]) {
 					var category = json[i]
-					cmd += `\n\`${prefix}${category[j].usage}\` | ${category[j].desc}\n`
+					cmd += `\n\`${PREFIX}${category[j].usage}\` | ${category[j].desc}\n`
 				}
 				message.author.send(`**${i}**\n${cmd}---------------\n`)
 			}

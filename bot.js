@@ -220,7 +220,7 @@ client.on('message', async message => {
 							}
 						})
 
-						if (r.count > parseInt((Math.ceil(message.member.voiceChannel.members.size) / 2) - 1)) {
+						if (r.count > parseInt((Math.ceil(message.member.voiceChannel.members.array.length) / 2) - 1)) {
 							console.log(`skip vote successful`)
 							serverQueue.connection.dispatcher.end()
 							collector.stop()
@@ -238,7 +238,7 @@ client.on('message', async message => {
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue.songs.length === 0) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			
-			let clearUser
+			let clearUser = message.author
 			if (message.mentions) {
 				if (!message.guild.member(message.author).hasPermission('MANAGE_MESSAGES')) {
 					message.author.send(`You have invalid permissions to clear others users songs from the queue`).catch(error => console.log(error))
@@ -251,13 +251,7 @@ client.on('message', async message => {
 					break
 				}
 				
-				try {
-					clearUser = message.guild.member(mentioned_users[0])
-				} catch(error) {
-					console.log(error)	
-				}
-			} else {
-				clearUser = message.author	
+				clearUser = message.guild.member(mentioned_users[0])
 			}
 			
 			let requestedSongs = serverQueue.songs.filter(song => song.requestedBy.id === clearUser.id)
@@ -292,7 +286,10 @@ client.on('message', async message => {
 			}
 
 			let durationString = serverQueue.songs[0].duration.hours > 0 ? `${serverQueue.songs[0].duration.hours} HOURS, ${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.` : `${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.`
-			let songString = `__**CURRENT SONG INFORMATION:**__\n\nTitle: \`${serverQueue.songs[0].title}\`\n\nDescription:\n\`\`\`${serverQueue.songs[0].description.substr(0, 1000).replace('`', '')}\`\`\`\nDuration: \`${durationString}\``
+			let lines = serverQueue.songs[0].description.split('\n')
+			let newDescription = lines.slice(0, 20).join('\n')
+			
+			let songString = `__**CURRENT SONG INFORMATION:**__\n\nTitle: \`${serverQueue.songs[0].title}\`\n\nDescription:\n\`\`\`${newDescription}\`\`\`\nDuration: \`${durationString}\``
 			message.channel.send(`${songString.substr(0, 2000)}`).then(msg => msg.delete(20 * 1000)).catch(error => console.error(error))
 			break
 
@@ -341,7 +338,7 @@ client.on('message', async message => {
 				break
 			}
 
-			let queueString = `__**SONG QUEUE:**__\n\n${serverQueue.songs.slice(0, 10).map(song => `**•** \`${song.title.substr(0, 80)}\` | **Requested By** \`${song.requestedBy.username}\``).join('\n')}\n${serverQueue.songs.length > 10 ? `**•** +${serverQueue.songs.length - 10} remaining\n` : ``}\n**Now Playing:** ${serverQueue.songs[0].title}`
+			let queueString = `__**SONG QUEUE:**__\n\n${serverQueue.songs.slice(0, 10).map(song => `\`\`\`• ${song.title}\nRequested By: ${song.requestedBy.username}\`\`\``).join('\n')}\n${serverQueue.songs.length > 10 ? `\`\`\`• +${serverQueue.songs.length - 10} remaining\`\`\`\n` : ``}`
 			message.channel.send(`${queueString.substr(0, 2000)}`)
 				.then(msg => msg.delete(30 * 1000)).catch(error => console.error(error))
 			break

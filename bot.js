@@ -250,10 +250,10 @@ client.on('message', async message => {
 					break
 				}
 				
-				console.log(mentioned_users)
-				
-				if (message.guild.member(mentioned_users[0])) {
+				try {
 					let clearUser = message.guild.member(mentioned_users[0])
+				} catch(error) {
+					console.log(error)	
 				}
 			} else {
 				let clearUser = message.author
@@ -273,18 +273,14 @@ client.on('message', async message => {
 				
 				if (queueIndex === 0 && !isCurrentSong) {
 					isCurrentSong = true
-					console.log(`current song detected`)
 				} else {
 					serverQueue.songs.splice(queueIndex, 1)
 				}
-				console.log(`Removed ${song.title} from queue`)
 			})
 
 			if (isCurrentSong) {
 				serverQueue.connection.dispatcher.end()
 			}
-			
-			message.delete(0).catch(error => console.error(error))
 			break
 
 		case 'song':

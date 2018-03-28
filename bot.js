@@ -238,10 +238,26 @@ client.on('message', async message => {
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue.songs.length === 0) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			
-			let requestedSongs = serverQueue.songs.filter(song => song.requestedBy.id === message.author.id)
+			if (args[0]) {
+				if (message.guild.member(args[0])) {
+					let clearUser = message.guild.member(args[0])
+				} else {
+					message.author.send(`user ${args[0]} does not exists...`)
+					break
+				}
+			} else {
+				let clearUser = message.author
+			}
+			
+			let requestedSongs = serverQueue.songs.filter(song => song.requestedBy.id === clearUser.id)
 			let isCurrentSong = false
 			
-			if (requestedSongs.length === 0) return message.reply(`You have no requested songs in this queue`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+			if (requestedSongs.length === 0) {
+				let noSongsString = args[0] ? `user ${clearUser} has no requested songs in this queue` : `You have no requested songs in this queue`
+				message.author.send(noSongsString).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+			
 			requestedSongs.forEach((song, index) => {
 				let queueIndex = serverQueue.songs.indexOf(song)
 				

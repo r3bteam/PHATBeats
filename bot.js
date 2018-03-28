@@ -279,10 +279,13 @@ client.on('message', async message => {
 							console.log(`shuffle vote successful`)
 							
 							let songs = serverQueue.songs
+							let firstSong = songs.shift()
+							
 							let clonedQueue = songs.slice()
 							
+							songs.shift()
 							songs.forEach((song, index) => {
-								let newIndex = (index + Math.floor(Math.random() * songs.length))
+								let newIndex = (index + Math.floor((Math.random() * songs.length) + 1))
 								if (newIndex > songs.length) {
 									newIndex = songs.length
 								}
@@ -291,6 +294,7 @@ client.on('message', async message => {
 								clonedQueue.splice(newIndex, 0, song)
 							})
 							
+							clonedQueue.splice(0, 0, firstSong)
 							serverQueue.songs = clonedQueue
 							collector.stop()
 						}

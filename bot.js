@@ -307,6 +307,8 @@ client.on('message', async message => {
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue.songs.length === 0) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			
+			/**
+			
 			let mentioned_users = []
 			if (message.mentions) {
 				if (!message.guild.member(message.author).hasPermission('MANAGE_MESSAGES')) {
@@ -317,11 +319,13 @@ client.on('message', async message => {
 				mentioned_users = message.mentions.users.array()
 			}
 			
-			let requestedSongs = message.mentions ? serverQueue.songs.filter(song => song.requestedBy.id === mentioned_users[0].id) : serverQueue.songs.filter(song => song.requestedBy.id === message.author.id)
+			**/
+			
+			let requestedSongs = serverQueue.songs.filter(song => song.requestedBy.id === message.author.id)
 			let isCurrentSong = false
 			
 			if (requestedSongs.length === 0) {
-				let noSongsString = message.mentions ? `user ${clearUser} has no requested songs in this queue` : `You have no requested songs in this queue`
+				let noSongsString = message.mentions ? `user ${message.author} has no requested songs in this queue` : `You have no requested songs in this queue`
 				message.author.send(noSongsString).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 				break
 			}

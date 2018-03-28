@@ -282,7 +282,7 @@ client.on('message', async message => {
 							let clonedQueue = songs.slice()
 							
 							songs.forEach((song, index) => {
-								let newIndex = (index + Math.floor((Math.random() * songs.length) + 1))
+								let newIndex = (index + Math.floor(Math.random() * songs.length))
 								if (newIndex > songs.length) {
 									newIndex = songs.length
 								}

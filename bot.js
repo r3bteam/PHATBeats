@@ -95,7 +95,7 @@ client.on('message', async message => {
 						var videos = await youtube.searchVideos(url, 5)
 
 						let index = 1
-						let selectionString = `__**SONG SELECTION:**__\n\n${videos.map(song => `**${index++}** ${song.title}`).join('\n')}\n\nUse the reactions below to select the desired song...`
+						let selectionString = `__**SONG SELECTION:**__\n\n${videos.map(song => `**${index++}**: ${song.title}`).join('\n')}\n\nUse the reactions below to select the desired song...`
 
 						message.channel.send(selectionString)
 							.then(async msg => {
@@ -409,7 +409,7 @@ client.on('message', async message => {
 				break
 			}
 
-			let queueString = `__**SONG QUEUE:**__\n\n\`\`\`${serverQueue.songs.slice(0, 10).map(song => `• ${song.title}\nRequested By: ${song.requestedBy.username}`).join('\n\n')}\n${serverQueue.songs.length > 10 ? `• +${serverQueue.songs.length - 10} remaining\n` : ``}\`\`\``
+			let queueString = `__**SONG QUEUE:**__\n\n\`\`\`${serverQueue.songs.slice(0, 10).map(song => `• ${song.title}\nRequested By: ${song.requestedBy.username}`).join('\n\n')}\n\n${serverQueue.songs.length > 10 ? `• +${serverQueue.songs.length - 10} remaining\n` : ``}\`\`\``
 			message.channel.send(`${queueString.substr(0, 2000)}`)
 				.then(msg => msg.delete(30 * 1000)).catch(error => console.error(error))
 			break

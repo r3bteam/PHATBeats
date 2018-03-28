@@ -307,23 +307,17 @@ client.on('message', async message => {
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue.songs.length === 0) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			
-			let clearUser = message.author
+			let mentioned_users = []
 			if (message.mentions) {
 				if (!message.guild.member(message.author).hasPermission('MANAGE_MESSAGES')) {
 					message.author.send(`You have invalid permissions to clear others users songs from the queue`).catch(error => console.log(error))
 					break
 				}
 				
-				let mentioned_users = message.mentions.users.array()
-				if (mentioned_users.length > 1) {
-					message.author.send(`You can only mention one user at a time with this command`)
-					break
-				}
-				
-				clearUser = message.guild.member(mentioned_users[0])
+				mentioned_users = message.mentions.users.array()
 			}
 			
-			let requestedSongs = serverQueue.songs.filter(song => song.requestedBy.id === clearUser.id)
+			let requestedSongs = message.mentions ? serverQueue.songs.filter(song => song.requestedBy.id === mentioned_users[0].id) : serverQueue.songs.filter(song => song.requestedBy.id === message.author.id)
 			let isCurrentSong = false
 			
 			if (requestedSongs.length === 0) {

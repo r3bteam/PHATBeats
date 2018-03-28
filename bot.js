@@ -250,6 +250,8 @@ client.on('message', async message => {
 					break
 				}
 				
+				console.log(mentioned_users)
+				
 				if (message.guild.member(mentioned_users[0])) {
 					let clearUser = message.guild.member(mentioned_users[0])
 				}

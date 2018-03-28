@@ -215,7 +215,7 @@ client.on('message', async message => {
 						await r.users.array().forEach((user, index) => {
 							let bot = message.guild.member(client.user)
 	
-							if (!bot.voiceChannel.members.find('user', user)) {
+							if (!bot.voiceChannel.members.find('id', user.id)) {
 								r.remove(user).catch(error => console.log(error))
 							}
 						})
@@ -223,6 +223,75 @@ client.on('message', async message => {
 						if (r.count > parseInt((Math.ceil(message.member.voiceChannel.members.array().length) / 2) - 1)) {
 							console.log(`skip vote successful`)
 							serverQueue.connection.dispatcher.end()
+							collector.stop()
+						}
+					})
+
+					collector.on('end', collected => {
+						msg.delete(0)
+					})
+				})
+			break
+			
+		case 'shuffle':
+			if (!message.member.voiceChannel) {
+				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			if (message.member.voiceChannel.id != message.guild.member(client.user).voiceChannel.id) {
+				message.author.send(`You must be inside the voice channel playing music to use this command...`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+
+			let shuffleString = `\`${message.author.username}\` has requested to shuffle the queue...\n\n**one clap, two clap, three clap, forty?**\n*Click on the 👏 to vote*`			
+			message.channel.send(shuffleString)
+				.then(async msg => {
+
+					await msg.react('👏')
+
+					const filter = (reaction, user) => !user.bot && reaction.emoji.name === '👏'
+					var collector = msg.createReactionCollector(filter, { time: 30 * 1000 })
+					
+					const requestingUsers = []
+					serverQueue.songs.forEach((song, index) => {
+						if (!requestingUsers.includes(song.requestedBy)) {
+							requestingUsers.push(song.requestedBy)	
+						}
+					})
+
+					collector.on('collect', async r => {
+						await requestingUsers.forEach((user, index) => {
+							if (!r.users.find('id', user.id)) {
+								r.remove(user).catch(error => console.log(error))
+							}
+						})
+
+						if (r.count > parseInt((Math.ceil(requestingUsers.length) / 2) - 1)) {
+							console.log(`shuffle vote successful`)
+							
+							let songs = serverQueue.songs
+							let clonedQueue = songs.slice()
+							
+							songs.forEach((song, index) => {
+								let newIndex = (index + Math.floor((Math.random() * songs.length) + 1))
+								if (newIndex > songs.length) {
+									newIndex = songs.length
+								}
+								
+								clonedQueue.splice(index, 1)
+								clonedQueue.splice(newIndex, 0, song)
+							})
+							
+							serverQueue.songs = clonedQueue
 							collector.stop()
 						}
 					})
@@ -338,7 +407,7 @@ client.on('message', async message => {
 				break
 			}
 
-			let queueString = `__**SONG QUEUE:**__\n\n\`\`\`${serverQueue.songs.slice(0, 10).map(song => `• ${song.title}\nRequested By: ${song.requestedBy.username}`).join('\n')}\n${serverQueue.songs.length > 10 ? `• +${serverQueue.songs.length - 10} remaining\n` : ``}\`\`\``
+			let queueString = `__**SONG QUEUE:**__\n\n\`\`\`${serverQueue.songs.slice(0, 10).map(song => `• ${song.title}\nRequested By: ${song.requestedBy.username}`).join('\n\n')}\n${serverQueue.songs.length > 10 ? `• +${serverQueue.songs.length - 10} remaining\n` : ``}\`\`\``
 			message.channel.send(`${queueString.substr(0, 2000)}`)
 				.then(msg => msg.delete(30 * 1000)).catch(error => console.error(error))
 			break

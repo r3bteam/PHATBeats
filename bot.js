@@ -238,6 +238,7 @@ client.on('message', async message => {
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue.songs.length === 0) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			
+			let clearUser
 			if (message.mentions) {
 				if (!message.guild.member(message.author).hasPermission('MANAGE_MESSAGES')) {
 					message.author.send(`You have invalid permissions to clear others users songs from the queue`).catch(error => console.log(error))
@@ -251,12 +252,12 @@ client.on('message', async message => {
 				}
 				
 				try {
-					let clearUser = message.guild.member(mentioned_users[0])
+					clearUser = message.guild.member(mentioned_users[0])
 				} catch(error) {
 					console.log(error)	
 				}
 			} else {
-				let clearUser = message.author
+				clearUser = message.author	
 			}
 			
 			let requestedSongs = serverQueue.songs.filter(song => song.requestedBy.id === clearUser.id)

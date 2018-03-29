@@ -535,8 +535,8 @@ async function play(guild, song) {
 		play(guild, serverQueue.songs[0])
 	}
 	
-	const videoInfo = ytdl.getInfo(song.url).then(info => console.log(info)).catch(error => console.log(error))
-	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, { quality: 'highestaudio', filter: 'audioonly' }))
+	//const videoInfo = ytdl.getInfo(song.url).then(info => console.log(info)).catch(error => console.log(error))
+	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, { quality: '94', filter: 'audioonly' }))
 
 	dispatcher.on('end', reason => {
 		serverQueue.songs.shift()

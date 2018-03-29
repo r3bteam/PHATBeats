@@ -535,6 +535,9 @@ async function play(guild, song) {
 		play(guild, serverQueue.songs[0])
 	}
 	
+	ytdl.getInfo(song.id).then(info => console.log(info)).catch(error => console.log(error))
+	
+	let quality = song.isStream ? '95' : 'highestaudio'
 	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, {filter: 'audioonly', quality: 'highestaudio'}))
 
 	dispatcher.on('end', reason => {
@@ -561,6 +564,7 @@ async function handleVideo(video, message, playlist = false) {
 		description: video.description,
 		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
+		isStream: !video.raw.snippet.liveBroadcastContent.equals(`none`),
 		requestedBy: message.author,
 		requestedIn: message.channel.name === 'bot-commands' ? message.channel : botCommandsChannel
 	}

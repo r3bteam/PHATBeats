@@ -508,7 +508,7 @@ client.on('message', async message => {
 			message.author.send(`\`(required)\` | \`<optional>\``)
 			break
 	}
-	if deleteCommand) message.delete(0).catch(error => console.error(error))
+	if (deleteCommand) message.delete(0).catch(error => console.error(error))
 })
 
 client.login(TOKEN)

@@ -536,7 +536,8 @@ async function play(guild, song) {
 	}
 	
 	ytdl.getInfo(song.url).then(info => {
-		if (info.formates.live) {
+		console.log(info)
+		if (info.formats.live) {
 			song.requestedIn.send(`${song.requestedBy}, Your song has been skipped due to livestreams not being supported...`)
 			serverQueue.songs.shift()
 			play(guild, serverQueue.songs[0])	

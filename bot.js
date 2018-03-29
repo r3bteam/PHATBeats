@@ -362,7 +362,7 @@ client.on('message', async message => {
 				break
 			}
 
-			let durationString = serverQueue.songs[0].duration.hours > 0 ? `${serverQueue.songs[0].duration.hours} HOURS, ${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.` : serverQueue.songs[0].isStream ? `• LIVE` : `${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.`
+			let durationString = serverQueue.songs[0].duration.hours > 0 ? `${serverQueue.songs[0].duration.hours} HOURS, ${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.` : serverQueue.songs[0].isStream ? `🔴LIVE` : `${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.`
 			let lines = serverQueue.songs[0].description.split('\n')
 			let newDescription = lines.slice(0, 20).join('\n')
 			

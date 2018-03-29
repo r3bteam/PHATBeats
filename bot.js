@@ -495,18 +495,40 @@ client.on('message', async message => {
 			break
 			
 		case 'help':
-			deleteCommand = true
 			let json = JSON.parse(fs.readFileSync('./help.json', 'utf8'))['results']
+		
+			if (args[0] === 'json') {
+				for (i in json) {
+					var cmd = ''
+					for (j in json[i]) {
+						var category = json[i]
+						cmd += `\n\`${PREFIX}${category[j].usage}\` | ${category[j].desc}\n`
+					}
+					message.author.send(`**${i}**\n${cmd}---------------\n`)
+				}
+				message.author.send(`\`(required)\` | \`<optional>\``)
+				break
+			}
+		
+			const embed = new discord.RichEmbed()
+				.setColor('#7d35fa')
+				.setAuthor('PHATBeats Commands', client.user.avatarURL)
+				.setDescription('If you\'re having trouble with any commands please contact the appropriate server moderator\n---------------\n')
+				.setTimestamp(new Date())
+				.setFooter('`(required)` | `<optional>`')
+		
 			for (i in json) {
 				var cmd = ''
 				for (j in json[i]) {
 					var category = json[i]
 					cmd += `\n\`${PREFIX}${category[j].usage}\` | ${category[j].desc}\n`
 				}
-				message.author.send(`**${i}**\n${cmd}---------------\n`)
+				embed.addField(`**${i}**`, `${command}---------------\n`)
 			}
-			message.author.send(`\`(required)\` | \`<optional>\``)
+		
+			message.author.send(`This message is an embed, if your embeds are disabled please use \`${PREFIX}help json\` to see commands printed in text format`, embed).catch(err => console.log(err.stack))
 			break
+			
 	}
 	if (deleteCommand) message.delete(0).catch(error => console.error(error))
 })

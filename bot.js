@@ -362,7 +362,7 @@ client.on('message', async message => {
 				break
 			}
 
-			let durationString = serverQueue.songs[0].duration.hours > 0 ? `${serverQueue.songs[0].duration.hours} HOURS, ${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.` : `${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.`
+			let durationString = serverQueue.songs[0].duration.hours > 0 ? `${serverQueue.songs[0].duration.hours} HOURS, ${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.` : serverQueue.songs[0].isStream ? `• LIVE` : `${serverQueue.songs[0].duration.minutes} MINUTES & ${serverQueue.songs[0].duration.seconds} SECONDS.`
 			let lines = serverQueue.songs[0].description.split('\n')
 			let newDescription = lines.slice(0, 20).join('\n')
 			
@@ -537,7 +537,7 @@ async function play(guild, song) {
 	
 	//ytdl.getInfo(song.url).then(info => console.log(info)).catch(error => console.log(error))
 	
-	let format = song.isStream ? {quality: '94'} : {filter: 'audioonly', quality: 'highestaudio'}
+	let format = song.isStream ? {quality: '91'} : {filter: 'audioonly', quality: 'highestaudio'}
 	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, format))
 
 	dispatcher.on('end', reason => {

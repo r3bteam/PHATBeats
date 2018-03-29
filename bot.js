@@ -535,15 +535,7 @@ async function play(guild, song) {
 		play(guild, serverQueue.songs[0])
 	}
 	
-	ytdl.getInfo(song.url).then(info => {
-		if (info.livestream === 1) {
-			song.requestedIn.send(`${song.requestedBy}, Your song has been skipped due to livestreams not being supported...`)
-			serverQueue.songs.shift()
-			play(guild, serverQueue.songs[0])	
-		}
-	}).catch(error => console.log(error))
-	
-	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, {filter: 'audioonly', quality: 95}))
+	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, {filter: 'audioonly', quality: '95'}))
 
 	dispatcher.on('end', reason => {
 		serverQueue.songs.shift()

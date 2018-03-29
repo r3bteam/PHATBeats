@@ -537,9 +537,8 @@ async function play(guild, song) {
 	
 	//ytdl.getInfo(song.url).then(info => console.log(info)).catch(error => console.log(error))
 	
-	let filter = song.isStream ? '' : 'audioonly'
-	let quality = song.isStream ? '94' : 'highestaudio'
-	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, {filter: filter, quality: quality}))
+	let format = song.isStream ? {quality: '94'} : {filter: 'audioonly', quality: 'highestaudio'}
+	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, format))
 
 	dispatcher.on('end', reason => {
 		serverQueue.songs.shift()

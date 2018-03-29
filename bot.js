@@ -535,7 +535,7 @@ async function play(guild, song) {
 		play(guild, serverQueue.songs[0])
 	}
 
-	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, { quality: ['91', '92', '93', '94', '95'], filter: 'audioonly' }))
+	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, { quality: 'highestaudio', filter: 'audioonly' }))
 
 	dispatcher.on('end', reason => {
 		serverQueue.songs.shift()

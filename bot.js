@@ -564,7 +564,7 @@ async function handleVideo(video, message, playlist = false) {
 		description: video.description,
 		duration: { hours: video.duration.hours, minutes: video.duration.minutes, seconds: video.duration.seconds },
 		url: `https://www.youtube.com/watch?v=${video.id}`,
-		isStream: !video.raw.snippet.liveBroadcastContent.equals(`none`),
+		isStream: video.raw.snippet.liveBroadcastContent != 'none',
 		requestedBy: message.author,
 		requestedIn: message.channel.name === 'bot-commands' ? message.channel : botCommandsChannel
 	}

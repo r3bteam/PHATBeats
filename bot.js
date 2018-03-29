@@ -47,9 +47,11 @@ client.on('message', async message => {
 	const url = args.join(' ').replace(/<(.+)>/g, '$1')
 
 	const serverQueue = queue.get(message.guild.id)
+	let deleteCommand = false
 
 	switch(command) {
 		case 'play':
+			deleteCommand = true
 			if (!args[0]) {
 				message.author.send(`Incorrect command usage... please provide a youtube search term, youtube video link or youtube playlist link.\n\`EXAMPLE: ${PREFIX}play (url/title)\``)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -179,6 +181,7 @@ client.on('message', async message => {
 			break
 
 		case 'skip':
+			deleteCommand = true
 			if (!message.member.voiceChannel) {
 				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -234,6 +237,7 @@ client.on('message', async message => {
 			break
 			
 		case 'shuffle':
+			deleteCommand = true
 			if (!message.member.voiceChannel) {
 				message.author.send(`You are not inside a voice channel... please join a channel and try again...`)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -307,6 +311,7 @@ client.on('message', async message => {
 			break
 
 		case 'clear':
+			deleteCommand = true
 			if (!message.member.voiceChannel) return message.reply(`You are not in a voice channel`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (!serverQueue) return message.reply(`There is nothing playing for me to stop`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
 			if (serverQueue.songs.length === 0) return message.reply(`There are no songs playing at the moment`).then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -350,6 +355,7 @@ client.on('message', async message => {
 			break
 
 		case 'song':
+			deleteCommand = true
 			if (!serverQueue || serverQueue.songs.length === 0) {
 				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -365,6 +371,7 @@ client.on('message', async message => {
 			break
 
 		case 'volume':
+			deleteCommand = true
 			if (!serverQueue || serverQueue.songs.length === 0) {
 				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -403,6 +410,7 @@ client.on('message', async message => {
 			break
 
 		case 'queue':
+			deleteCommand = true
 			if (!serverQueue || serverQueue.songs.length === 0) {
 				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -415,6 +423,7 @@ client.on('message', async message => {
 			break
 
 		case 'pause':
+			deleteCommand = true
 			if (!serverQueue || serverQueue.songs.length === 0) {
 				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -456,6 +465,7 @@ client.on('message', async message => {
 			break
 
 		case 'resume':
+			deleteCommand = true
 			if (!serverQueue || serverQueue.songs.length === 0) {
 				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
 					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
@@ -485,6 +495,7 @@ client.on('message', async message => {
 			break
 			
 		case 'help':
+			deleteCommand = true
 			let json = JSON.parse(fs.readFileSync('./help.json', 'utf8'))['results']
 			for (i in json) {
 				var cmd = ''
@@ -497,7 +508,7 @@ client.on('message', async message => {
 			message.author.send(`\`(required)\` | \`<optional>\``)
 			break
 	}
-	message.delete(0).catch(error => console.error(error))
+	if deleteCommand) message.delete(0).catch(error => console.error(error))
 })
 
 client.login(TOKEN)

@@ -524,7 +524,7 @@ client.on('message', async message => {
 					var category = json[i]
 					cmd += `\n\`${PREFIX}${category[j].usage}\` | ${category[j].desc}\n`
 				}
-				embed.addField(`**${i}**`, `${command}---------------\n`)
+				embed.addField(`**${i}**`, `${cmd}---------------\n`)
 			}
 		
 			message.author.send(`This message is an embed, if your embeds are disabled please use \`${PREFIX}help json\` to see commands printed in text format`, embed).catch(err => console.log(err.stack))

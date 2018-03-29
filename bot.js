@@ -535,7 +535,7 @@ async function play(guild, song) {
 		play(guild, serverQueue.songs[0])
 	}
 	
-	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, {filter: 'audioonly', quality: 'lowest'}))
+	const dispatcher = serverQueue.connection.playStream(ytdl(song.url, {filter: 'audioonly', quality: 'highestaudio'}))
 
 	dispatcher.on('end', reason => {
 		serverQueue.songs.shift()
@@ -550,6 +550,8 @@ async function play(guild, song) {
 }
 
 async function handleVideo(video, message, playlist = false) {
+	console.log(video)
+	
 	const serverQueue = queue.get(message.guild.id)
 	const botCommandsChannel = message.guild.channels.find('name', 'bot-commands') ? message.guild.channels.findAll('name', 'bot-commands').pop() : message.channel
 	

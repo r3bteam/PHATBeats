@@ -1,3 +1,4 @@
+const discord = require('discord.js')
 const { Client, Util } = require('discord.js')
 const fs = require('fs')
 

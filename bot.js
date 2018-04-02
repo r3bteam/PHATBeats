@@ -198,16 +198,14 @@ client.on('message', async message => {
 					const filter = (reaction, user) => !user.bot && reaction.emoji.name === '👏'
 					var collector = msg.createReactionCollector(filter, { time: 30 * 1000 })
 
-					collector.on('collect', async r => {
-						await r.users.array().forEach((user, index) => {
-							let bot = message.guild.member(client.user)
-	
-							if (!bot.voiceChannel.members.find('id', user.id)) {
-								r.remove(user).catch(error => console.log(error))
-							}
+					collector.on('collect', r => {
+						let reacting_users = r.users.filterArray(user => message.guild.member(user).voiceChannel != message.guild.member(client.user).voiceChannel)
+						
+						reacting_users.forEach((user, index) => {
+							r.remove(user).catch(error => console.log(error.stack))
 						})
 
-						if (r.count > parseInt((Math.ceil(message.member.voiceChannel.members.array().length) / 2) - 1)) {
+						if (r.count > parseInt(Math.ceil(message.guild.member(client.user).voiceChannel.members.size / 2) - 1)) {
 							console.log(`skip vote successful`)
 							serverQueue.connection.dispatcher.end()
 							collector.stop()
@@ -256,14 +254,14 @@ client.on('message', async message => {
 						}
 					})
 
-					collector.on('collect', async r => {
-						await requestingUsers.forEach((user, index) => {
+					collector.on('collect', r => {					
+						requestingUsers.forEach((user, index) => {
 							if (!r.users.find('id', user.id)) {
 								r.remove(user).catch(error => console.log(error))
 							}
 						})
 
-						if (r.count > parseInt((Math.ceil(requestingUsers.length) / 2) - 1)) {
+						if (r.count > parseInt(Math.ceil(message.guild.member(client.user).voiceChannel.members.size / 2) - 1)) {
 							console.log(`shuffle vote successful`)
 							
 							let songs = serverQueue.songs

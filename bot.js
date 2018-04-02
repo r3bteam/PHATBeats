@@ -98,7 +98,7 @@ client.on('message', async message => {
 						var videos = await youtube.searchVideos(url, 5)
 
 						let index = 1
-						let selectionString = `__**SONG SELECTION:**__\n\n${videos.map(song => `**${index++}**: ${song.title}`).join('\n')}\n\nUse the reactions below to select the desired song...`
+						let selectionString = `__**SONG SELECTION:**__\n\n${videos.map(song => `**${index++}**: ${song.title}`).join('\n')}\n\nRespond with 1-5 to select the desired song...`
 
 						message.channel.send(selectionString)
 							.then(async msg => {
@@ -110,36 +110,41 @@ client.on('message', async message => {
 									if(m.content.includes('1')) {
 										//Use song selection one
 										videoID = videos[0].id
+										m.delete(0).catch(error => console.log(error.stack))
 										collector.stop()
 									}
 
 									if(m.content.includes('2')) {
 										//Use song selection two
 										videoID = videos[1].id
+										m.delete(0).catch(error => console.log(error.stack))
 										collector.stop()
 									}
 
 									if(m.content.includes('3')) {
 										//Use song selection three
 										videoID = videos[2].id
+										m.delete(0).catch(error => console.log(error.stack))
 										collector.stop()
 									}
 
 									if(m.content.includes('4')) {
 										//Use song selection four
 										videoID = videos[3].id
+										m.delete(0).catch(error => console.log(error.stack))
 										collector.stop()
 									}
 
 									if(m.content.includes('5')) {
 										//Use song selection five
 										videoID = videos[4].id
+										m.delete(0).catch(error => console.log(error.stack))
 										collector.stop()
 									}
 								})
 
-								collector.on('end', async collected => {
-									msg.delete(0)
+								collector.on('end', collected => {
+									msg.delete(0).catch(error => console.log(error.stack))
 
 									try {
 										if (videoID != null) {

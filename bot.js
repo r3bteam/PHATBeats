@@ -143,7 +143,7 @@ client.on('message', async message => {
 									}
 								})
 
-								collector.on('end', collected => {
+								collector.on('end', async collected => {
 									msg.delete(0).catch(error => console.log(error.stack))
 
 									try {

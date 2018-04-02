@@ -102,60 +102,38 @@ client.on('message', async message => {
 
 						message.channel.send(selectionString)
 							.then(async msg => {
-
-								/*
-									\u0031\u20E3
-									\u0032\u20E3
-									\u0033\u20E3
-									\u0034\u20E3
-									\u0035\u20E3
-
-								*/
-
-								await msg.react('\u0031\u20E3')
-								await msg.react('\u0032\u20E3')
-								await msg.react('\u0033\u20E3')
-								await msg.react('\u0034\u20E3')
-								await msg.react('\u0035\u20E3')
-								await msg.react('❌')
-
-								const filter = (reaction, user) => user.id === message.author.id
-								var collector = msg.createReactionCollector(filter, { time: 30 * 1000 })
+								const filter = m => m.author.id === message.author.id
+								let collector = msg.channel.createMessageCollector(filter, { time: 30 * 1000 })
 
 								let videoID
-								collector.once('collect', async r => {
-									if(r.emoji.name.includes('1')) {
+								collector.once('collect', m => {
+									if(m.content.equals('1')) {
 										//Use song selection one
 										videoID = videos[0].id
 										collector.stop()
 									}
 
-									if(r.emoji.name.includes('2')) {
+									if(m.content.equals('2')) {
 										//Use song selection two
 										videoID = videos[1].id
 										collector.stop()
 									}
 
-									if(r.emoji.name.includes('3')) {
+									if(m.content.equals('3')) {
 										//Use song selection three
 										videoID = videos[2].id
 										collector.stop()
 									}
 
-									if(r.emoji.name.includes('4')) {
+									if(m.content.equals('4')) {
 										//Use song selection four
 										videoID = videos[3].id
 										collector.stop()
 									}
 
-									if(r.emoji.name.includes('5')) {
+									if(m.content.equals('5')) {
 										//Use song selection five
 										videoID = videos[4].id
-										collector.stop()
-									}
-
-									//End Collector Process
-									if(r.emoji.name === '❌') {
 										collector.stop()
 									}
 								})

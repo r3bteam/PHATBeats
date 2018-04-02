@@ -107,31 +107,31 @@ client.on('message', async message => {
 
 								let videoID
 								collector.once('collect', m => {
-									if(m.content.equals('1')) {
+									if(m.content.includes('1')) {
 										//Use song selection one
 										videoID = videos[0].id
 										collector.stop()
 									}
 
-									if(m.content.equals('2')) {
+									if(m.content.includes('2')) {
 										//Use song selection two
 										videoID = videos[1].id
 										collector.stop()
 									}
 
-									if(m.content.equals('3')) {
+									if(m.content.includes('3')) {
 										//Use song selection three
 										videoID = videos[2].id
 										collector.stop()
 									}
 
-									if(m.content.equals('4')) {
+									if(m.content.includes('4')) {
 										//Use song selection four
 										videoID = videos[3].id
 										collector.stop()
 									}
 
-									if(m.content.equals('5')) {
+									if(m.content.includes('5')) {
 										//Use song selection five
 										videoID = videos[4].id
 										collector.stop()

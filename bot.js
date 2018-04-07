@@ -218,6 +218,24 @@ client.on('message', async message => {
 				})
 			break
 			
+		case 'fskip':
+			deleteCommand = true
+			if (!serverQueue || serverQueue.songs.length === 0) {
+				message.author.send(`There are no songs playing in the guild \`${message.guild.name}\``)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+			
+			if (!message.member.hasPermission('MANAGE_CHANNELS')) {
+				message.author.send(`You have insufficient permissions to use this command`)
+					.then(msg => msg.delete(10 * 1000)).catch(error => console.error(error))
+				break
+			}
+			
+			console.log(`force skip successful`)
+			serverQueue.connection.dispatcher.end()
+			break
+			
 		case 'shuffle':
 			deleteCommand = true
 			if (!message.member.voiceChannel) {
